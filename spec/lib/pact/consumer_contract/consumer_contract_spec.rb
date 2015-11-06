@@ -115,5 +115,66 @@ module Pact
       end
     end
 
+    describe ".get_response_contract" do
+      let(:consumer) { double('Pact::ServiceConsumer', :name => 'my consumer')}
+      let(:provider) { double('Pact::ServiceProvider', :name => 'my provider')}
+      let(:response) { { body: Pact::SomethingLike.new('my body') } }
+      let(:interaction) { double('Pact::Interaction', response: response, provider_state: 'my state') }
+      let(:contract) { ConsumerContract.new(interactions: [interaction], consumer: consumer, provider: provider) }
+      let(:pact_borker_uri) { URI("http://pact-broker/pacts/provider/my%20provider/consumer/my%20consumer/latest") }
+      subject { described_class.get_response_contract("my provider", "my consumer", state) }
+
+      before do
+        expect(Pact::ConsumerContract).to receive(:from_uri).with(pact_borker_uri).and_return(contract)
+      end
+
+      context "state exist" do
+        let(:state) { "my state" }
+        it 'returns respose contract' do
+          expect(subject).to be_instance_of(Pact::SomethingLike)
+        end
+      end
+
+      context "state does not exist" do
+        let(:state) { "dummy state" }
+        it "fails" do
+          expect { subject }.to raise_error
+        end
+      end
+    end
+
+    describe ".get_response_sample" do
+      let(:consumer) { double('Pact::ServiceConsumer', :name => 'my consumer')}
+      let(:provider) { double('Pact::ServiceProvider', :name => 'my provider')}
+      let(:response) { { body: Pact::SomethingLike.new('my body') } }
+      let(:interaction) { double('Pact::Interaction', response: response, provider_state: 'my state') }
+      let(:contract) { ConsumerContract.new(interactions: [interaction], consumer: consumer, provider: provider) }
+      let(:pact_borker_uri) { URI("http://pact-broker/pacts/provider/my%20provider/consumer/my%20consumer/latest") }
+      subject { described_class.get_response_sample("my provider", "my consumer", state) }
+
+      before do
+        expect(Pact::ConsumerContract).to receive(:from_uri).with(pact_borker_uri).and_return(contract)
+      end
+
+      context "state exist" do
+        let(:state) { "my state" }
+        it 'returns respose contract' do
+          expect(subject).to eq('my body')
+        end
+      end
+
+      context "state does not exist" do
+        let(:state) { "dummy state" }
+        it "fails" do
+          expect { subject }.to raise_error
+        end
+      end
+    end
+
+    describe ".pact_broker_url" do
+      it 'is private and not accessible' do
+        expect { Pact::ConsumerContract.pact_broker_url('foo', 'bar') }.to raise_error(NoMethodError)
+      end
+    end
   end
 end

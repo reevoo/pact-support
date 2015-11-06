@@ -10,6 +10,7 @@ require 'pact/consumer_contract/service_consumer'
 require 'pact/consumer_contract/service_provider'
 require 'pact/consumer_contract/interaction'
 require 'pact/consumer_contract/pact_file'
+require 'pact/consumer_contract/response_finder'
 
 module Pact
 
@@ -18,6 +19,7 @@ module Pact
     include SymbolizeKeys
     include Logging
     include PactFile
+    extend ResponseFinder
 
     attr_accessor :interactions
     attr_accessor :consumer
